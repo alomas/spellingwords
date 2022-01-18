@@ -67,9 +67,12 @@ class HTTPRequestHandler(server.SimpleHTTPRequestHandler):
         if self.path == '/nextword':
             self.send_response(200, 'Not Found')
             self.end_headers()
-
+            global data
             global counter
-            print(f'counter={data[counter]} {counter}')
+            if len(data) == 0:
+                with open('bee.json', 'r') as f:
+                    data = json.load(f)
+            print(f'counter={data[counter]} {len(data)}')
             newword = data.pop(0).replace("'", "\'")
             self.wfile.write(newword.encode('utf-8'))
 
