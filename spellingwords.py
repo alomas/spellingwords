@@ -74,7 +74,7 @@ class HTTPRequestHandler(server.SimpleHTTPRequestHandler):
             counter += 1
             if counter > len(data) - 1:
                 counter = 0
-            print(f'counter={data[counter]} {counter}')
+            print(f'counter={data[counter]} counter={counter} numwords={len(data)}')
             newword = data[counter].replace("'", "\'")
 
             self.wfile.write(newword.encode('utf-8'))
@@ -92,7 +92,7 @@ class HTTPRequestHandler(server.SimpleHTTPRequestHandler):
             counter -= 1
             if counter < 0:
                 counter = len(data) -1
-            print(f'counter={data[counter]} {counter}')
+            print(f'counter={data[counter]} counter={counter} numwords={len(data)}')
             newword = data[counter].replace("'", "\'")
             self.wfile.write(newword.encode('utf-8'))
             f = open("active.json", "w")
@@ -105,7 +105,7 @@ class HTTPRequestHandler(server.SimpleHTTPRequestHandler):
         if self.path == '/curword':
             self.send_response(200, 'Not Found')
             self.end_headers()
-            print(f'counter={data[counter]} {counter}')
+            print(f'counter={data[counter]} counter={counter} numwords={len(data)}')
             newword = data[counter].replace("'", "\'")
             self.wfile.write(newword.encode('utf-8'))
             f = open("active.json", "w")
@@ -118,9 +118,11 @@ class HTTPRequestHandler(server.SimpleHTTPRequestHandler):
         if self.path == '/delword':
             self.send_response(200, 'Not Found')
             self.end_headers()
-            print(f'counter={data[counter]} {counter}')
+            print(f'counter={data[counter]} counter={counter} numwords={len(data)}')
             newword = data.pop(counter).replace("'", "\'")
             deleted.append(newword)
+            if counter > len(data) - 1:
+                counter = 0
             self.wfile.write(newword.encode('utf-8'))
             f = open("active.json", "w")
             json.dump(data, f)
