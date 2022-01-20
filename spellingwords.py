@@ -64,26 +64,80 @@ class HTTPRequestHandler(server.SimpleHTTPRequestHandler):
         self.wfile.write(reply_body.encode('utf-8'))
 
     def do_GET(self):
+        global data
+        global counter
+        global deleted
         if self.path == '/nextword':
             self.send_response(200, 'Not Found')
             self.end_headers()
-            global data
-            global counter
-            if len(data) == 0:
-                with open('bee.json', 'r') as f:
-                    data = json.load(f)
-            print(f'counter={data[counter]} {len(data)}')
-            newword = data.pop(0).replace("'", "\'")
-            self.wfile.write(newword.encode('utf-8'))
 
-        else:
-            self.send_response(404, 'Not Found')
+            counter += 1
+            if counter > len(data) - 1:
+                counter = 0
+            print(f'counter={data[counter]} {counter}')
+            newword = data[counter].replace("'", "\'")
+
+            self.wfile.write(newword.encode('utf-8'))
+            f = open("active.json", "w")
+            json.dump(data, f)
+            f.close()
+            f = open("deleted.json", "w")
+            json.dump(deleted, f)
+            f.close()
+            return
+
+        if self.path == '/prevword':
+            self.send_response(200, 'Not Found')
             self.end_headers()
-            self.wfile.write("Sorry, your page is not found".encode('utf-8'))
+            counter -= 1
+            if counter < 0:
+                counter = len(data) -1
+            print(f'counter={data[counter]} {counter}')
+            newword = data[counter].replace("'", "\'")
+            self.wfile.write(newword.encode('utf-8'))
+            f = open("active.json", "w")
+            json.dump(data, f)
+            f.close()
+            f = open("deleted.json", "w")
+            json.dump(deleted, f)
+            f.close()
+            return
+        if self.path == '/curword':
+            self.send_response(200, 'Not Found')
+            self.end_headers()
+            print(f'counter={data[counter]} {counter}')
+            newword = data[counter].replace("'", "\'")
+            self.wfile.write(newword.encode('utf-8'))
+            f = open("active.json", "w")
+            json.dump(data, f)
+            f.close()
+            f = open("deleted.json", "w")
+            json.dump(deleted, f)
+            f.close()
+            return
+        if self.path == '/delword':
+            self.send_response(200, 'Not Found')
+            self.end_headers()
+            print(f'counter={data[counter]} {counter}')
+            newword = data.pop(counter).replace("'", "\'")
+            deleted.append(newword)
+            self.wfile.write(newword.encode('utf-8'))
+            f = open("active.json", "w")
+            json.dump(data, f)
+            f.close()
+            f = open("deleted.json", "w")
+            json.dump(deleted, f)
+            f.close()
+            return
+
+        self.send_response(404, 'Not Found')
+        self.end_headers()
+        self.wfile.write("Sorry, your page is not found".encode('utf-8'))
 
 counter = 0
 with open('bee.json', 'r') as f:
   data = json.load(f)
+deleted = []
 
 if __name__ == '__main__':
     server.test(HandlerClass=HTTPRequestHandler)
